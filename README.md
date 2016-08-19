@@ -6,4 +6,6 @@ Yaf框架的二次封装，便于开发：
 
 1. 配置分组
 2. 整合Composer到Yaf
+3. 添加助手包(application/library/yaf/helper)
+
 
