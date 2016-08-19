@@ -1,0 +1,30 @@
+{
+    "name": "yaf-plus",
+    "description": "Yaf框架二次封装",
+    "keywords": ["yaf", "yaf-plus", "moonbird"],
+    "license": "MIT",
+    "type": "project",
+    "authors": [
+        {
+            "name": "xiaopeng.wang",
+            "email": "363939126@qq.com",
+            "homepage": "http://moonbird.yunshangyun.com/",
+            "role": "Architects"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9",
+        "yaf": "*"
+    },
+    "require-dev": {
+
+    },
+    "autoload": {
+        "psr-4": {
+
+        }
+    },
+    "autoload-dev": {
+
+    }
+}
