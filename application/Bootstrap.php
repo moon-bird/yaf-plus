@@ -27,11 +27,47 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
 		$testEnvIps = $appConfig->get('application.server.test');
 		$productEnvIps = $appConfig->get('application.server.product');
 
-		$curEnv = null;
-		$serverIp = $_SERVER['SERVER_ADDR'].'#';
-		empty($curEnv) && strpos($productEnvIps,$serverIp) !== false && $curEnv='product';
-		empty($curEnv) && strpos($testEnvIps,$serverIp) !== false && $curEnv='test';
-		empty($curEnv) && $curEnv = 'common';
+		$request = Yaf_Application::app()->getDispatcher()->getRequest();
+
+		if ($request->isCli()){
+
+			$uriParams = [];
+
+			$uri = $request->getRequestUri();
+			$uriArr = explode('&',$uri);
+			foreach($uriArr as $key=>$item){
+
+				if (0 == $key){
+
+					$request->setRequestUri($item);
+				} else {
+
+					$itemArr = explode('=', $item);
+
+					if (isset($itemArr[0]) == false || isset($itemArr[1]) == false){
+
+						continue;
+					}
+					$request->setParam($itemArr[0], $itemArr[1]);
+				}
+			}
+
+			$env = $request->getParam('env', 'common');
+			if (in_array($env, ['common', 'test', 'product'])){
+
+				$curEnv = $env;
+			} else {
+
+				$curEnv = 'common';
+			}
+		} else {
+
+			$curEnv = null;
+			$serverIp = $_SERVER['SERVER_ADDR'].'#';
+			empty($curEnv) && strpos($productEnvIps,$serverIp) !== false && $curEnv='product';
+			empty($curEnv) && strpos($testEnvIps,$serverIp) !== false && $curEnv='test';
+			empty($curEnv) && $curEnv = 'common';
+		}
 
 		//加载business配置
 		$businessConf = new Yaf_Config_Ini(APPLICATION_PATH . "/conf/business.ini", $curEnv);
