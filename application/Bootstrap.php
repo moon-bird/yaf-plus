@@ -9,24 +9,31 @@
  */
 class Bootstrap extends Yaf_Bootstrap_Abstract{
 
+	const BUSINESS_CONFIG_KEY = 'business_config';
+
+	/**
+	 * @var Yaf_Config_Simple
+	 */
+	private $_appConfig = null;
+
+	/**
+	 * 初始化配置
+	 */
     public function _initConfig() {
 
 		//把配置保存起来
-		$appConfig = Yaf_Application::app()->getConfig();
+		$this->_appConfig = Yaf_Application::app()->getConfig();
 
 		//设置字符集
-		header('Content-Type: text/html; charset=' . $appConfig->get('application.charset'));
+		header('Content-Type: text/html; charset=' . $this->_appConfig->get('application.charset'));
 
 		//设置时区
-		date_default_timezone_set($appConfig->get('application.timezone'));
+		date_default_timezone_set($this->_appConfig->get('application.timezone'));
 
 		//版本号
-		header("X-Develop-Version:".$appConfig->get('application.version'));
+		header("X-Develop-Version:".$this->_appConfig->get('application.version'));
 
 		//环境选择
-		$testEnvIps = $appConfig->get('application.server.test');
-		$productEnvIps = $appConfig->get('application.server.product');
-
 		$request = Yaf_Application::app()->getDispatcher()->getRequest();
 
 		if ($request->isCli()){
@@ -62,6 +69,9 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
 			}
 		} else {
 
+			$testEnvIps    = $this->_appConfig->get('application.server.test');
+			$productEnvIps = $this->_appConfig->get('application.server.product');
+
 			$curEnv = null;
 			$serverIp = $_SERVER['SERVER_ADDR'].'#';
 			empty($curEnv) && strpos($productEnvIps,$serverIp) !== false && $curEnv='product';
@@ -70,31 +80,31 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
 		}
 
 		//加载business配置
-		$businessConf = new Yaf_Config_Ini(APPLICATION_PATH . "/conf/business.ini", $curEnv);
+		$businessConf = new Yaf_Config_Ini(APPLICATION_PATH . '/conf/business.ini', $curEnv);
 
 		//注册配置
-		Yaf_Registry::set('config', $businessConf);
+		Yaf_Registry::set(self::BUSINESS_CONFIG_KEY, $businessConf);
+
+		//自动加载
+		file_exists(APPLICATION_PATH . '/vendor/autoload.php') && Yaf_Loader::import(APPLICATION_PATH . '/vendor/autoload.php');
 	}
 
 	/**
-	 * 集成Composer
+	 * 注册插件
+	 * @param Yaf_Dispatcher $dispatcher
 	 */
-	public function _initComposer(){
-
-		file_exists(APPLICATION_PATH . "/vendor/autoload.php") && Yaf_Loader::import(APPLICATION_PATH . "/vendor/autoload.php");
-	}
-
 	public function _initPlugin(Yaf_Dispatcher $dispatcher) {
-		//注册一个插件
-		$objSamplePlugin = new SamplePlugin();
-		$dispatcher->registerPlugin($objSamplePlugin);
+
+		//$dispatcher->registerPlugin();
 	}
 
 	public function _initRoute(Yaf_Dispatcher $dispatcher) {
+
 		//在这里注册自己的路由协议,默认使用简单路由
 	}
 	
 	public function _initView(Yaf_Dispatcher $dispatcher){
+
 		//在这里注册自己的view控制器，例如smarty,firekylin
 	}
 }
